@@ -1,10 +1,11 @@
 "use server";
 
 import { connectDB } from "@/lib/dbConfig";
+import { sendMail } from "@/lib/nodemailer";
 import { authenticationSchema } from "@/lib/Zod";
 import { userDB } from "@/model/user.model";
 import { hashedPassword, verifyPassword } from "@/utils/bcrypt";
-import { generateToken } from "@/utils/crypto";
+import { generateOtp, generateToken } from "@/utils/crypto";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
@@ -54,11 +55,17 @@ export async function authAction(_, formdata) {
     }
 
     const hashedPas = await hashedPassword(password);
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    await sendMail(email, otp);
 
     user = new userDB({
       username,
       email,
       password: hashedPas,
+      otp,
+      otpExpires,
     });
     await user.save();
   }
@@ -66,5 +73,42 @@ export async function authAction(_, formdata) {
   const token = generateToken(user._id, user.username, user.email);
   cookieStore.set("auth_token", token);
 
-  return { success: true, message: "Login or Register Successfully" };
+  return {
+    success: true,
+    message: "Login or Register Successfully",
+    email: user.email,
+  };
+}
+
+export async function verifyOTP(pin, email) {
+  try {
+    let user = await userDB.findOne({ email });
+
+    if (!user) {
+      return {
+        success: false,
+        message:
+          "Oops! Looks like you haven't registered yet. Please sign up to get started.",
+      };
+    }
+
+    if (pin !== user.otp || user.otpExpires < new Date()) {
+      return {
+        success: false,
+        message:
+          "The OTP is incorrect or has expired. Please request a new one.",
+      };
+    }
+
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    user.isVerified = true;
+
+    await user.save();
+
+    return { success: true, message: "Your email address is verified" };
+  } catch (error) {
+    console.log(error.message);
+    return null;
+  }
 }

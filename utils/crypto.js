@@ -13,5 +13,5 @@ export const generateToken = (id, username, email) => {
 };
 
 export const generateOtp = () => {
-  return crypto.randomInt(100000, 1000000);
+  return crypto.randomInt(100000, 1000000).toString();
 };

@@ -13,14 +13,17 @@ import { InputOTPForm } from "@/components/custom/InputOtp";
 
 export default function Register() {
   const [state, formAction, isPending] = useActionState(authAction);
+  const [email, setEmail] = useState("");
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (state) {
       if (!state.success) {
         handleWarnSwal(state?.message);
       } else {
-        router.push("/");
+        setEmail(state?.email);
+        setIsOpen(true);
       }
     }
   }, [state]);
@@ -51,7 +54,7 @@ export default function Register() {
           </p>
         </div>
       </form>
-      <InputOTPForm />
+      {isOpen && <InputOTPForm email={email} setIsOpen={setIsOpen} />}
     </section>
   );
 }

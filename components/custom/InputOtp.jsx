@@ -18,6 +18,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { verifyOTP } from "@/app/actions/auth.action";
+import { handleWarnSwal } from "@/utils/swal";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -25,7 +28,8 @@ const FormSchema = z.object({
   }),
 });
 
-export function InputOTPForm() {
+export function InputOTPForm({ email, setIsOpen }) {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -33,8 +37,16 @@ export function InputOTPForm() {
     },
   });
 
-  function onSubmit(data) {
-    console.log(data);
+  async function onSubmit(data) {
+    console.log(data.pin, ": pin");
+    console.log("Email: ", email);
+    const res = await verifyOTP(data.pin, email);
+    if (!res.success) {
+      handleWarnSwal(res?.message);
+    } else {
+      setIsOpen(false);
+      router.push("/");
+    }
     form.reset();
   }
 
@@ -50,7 +62,7 @@ export function InputOTPForm() {
             control={form.control}
             name="pin"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className={""}>
                 <FormLabel className="text-sm text-neutral-300 flex justify-center">
                   One-Time Password
                 </FormLabel>
@@ -71,7 +83,7 @@ export function InputOTPForm() {
                 <FormDescription className="text-neutral-400 text-xs mt-1 text-center">
                   Please enter the one-time password sent to your phone.
                 </FormDescription>
-                <FormMessage />
+                <FormMessage className={"text-center"} />
               </FormItem>
             )}
           />
