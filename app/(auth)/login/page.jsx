@@ -1,9 +1,9 @@
 "use client";
 
 import { authAction } from "@/app/actions/auth.action";
-import { Email } from "@/component/Form/Email";
-import { Password } from "@/component/Form/Password";
-import { Submit } from "@/component/Form/Submit";
+import { Email } from "@/components/form/Email";
+import { Password } from "@/components/form/Password";
+import { Submit } from "@/components/form/Submit";
 import { handleWarnSwal } from "@/utils/swal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

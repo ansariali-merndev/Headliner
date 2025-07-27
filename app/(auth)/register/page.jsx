@@ -1,14 +1,15 @@
 "use client";
 
-import { Email } from "../../../component/Form/Email";
-import { Password } from "../../../component/Form/Password";
-import { Username } from "../../../component/Form/Username";
-import { Submit } from "../../../component/Form/Submit";
+import { Email } from "../../../components/form/Email";
+import { Password } from "../../../components/form/Password";
+import { Username } from "../../../components/form/Username";
+import { Submit } from "../../../components/form/Submit";
 import Link from "next/link";
 import { authAction } from "@/app/actions/auth.action";
 import { useActionState, useEffect, useState } from "react";
 import { handleWarnSwal } from "@/utils/swal";
 import { useRouter } from "next/navigation";
+import { InputOTPForm } from "@/components/custom/InputOtp";
 
 export default function Register() {
   const [state, formAction, isPending] = useActionState(authAction);
@@ -50,6 +51,7 @@ export default function Register() {
           </p>
         </div>
       </form>
+      <InputOTPForm />
     </section>
   );
 }
